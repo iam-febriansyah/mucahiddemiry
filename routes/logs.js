@@ -7,7 +7,7 @@ const { protect } = require('../middleware/auth');
 router.post('/add', protect, async (req, res) => {
     const { clientName, startTime, endTime } = req.body;
     const user = req.user;
-    
+
     try {
         if (!clientName || !startTime || !endTime) {
             return res.status(400).json({ message: 'All fields are required.' });

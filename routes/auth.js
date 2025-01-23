@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     console.log('Register route hit with username:', username);
-    
+
     try {
         const userExists = await User.findOne({ username });
         if (userExists) {
@@ -16,14 +16,14 @@ router.post('/register', async (req, res) => {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        
+
         console.log('Registration - Original password:', password);
         console.log('Registration - Hashed password:', hashedPassword);
         const user = new User({
             username,
             password: hashedPassword
         });
-        
+
         await user.save();
         res.status(201).json({ 
             message: 'User registered successfully!',
@@ -41,19 +41,19 @@ router.post('/register', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
     console.log('Login route hit - Request body:', req.body);
-    
+
     try {
         const { username, password } = req.body;
-        
+
         if (!username || !password) {
             console.log('Missing credentials');
             return res.status(400).json({ message: 'Username and password are required' });
         }
         // Direct database query with all fields
         const user = await User.findOne({ username }).lean();
-        
+
         console.log('Raw user from database:', user);
-        
+
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -74,7 +74,7 @@ router.post('/login', async (req, res) => {
             );
             return res.json({ token });
         }
-        
+
         return res.status(400).json({ 
             message: 'Invalid credentials',
             debug: {

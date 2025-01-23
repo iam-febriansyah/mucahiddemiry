@@ -300,7 +300,6 @@
       }
     }
 
-
     async function updateUserList() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/logs/view`, {
@@ -321,6 +320,40 @@
       } catch (error) {
         console.error('Error updating user list:', error);
       }
+    }
+
+    async function addMultipleStops() {
+      try {
+        var clientName = document.getElementById('multipleClientName').value;
+        var multipleStopDate = document.getElementById('multipleStopDate').value;
+        var startTime = document.getElementById('multipleStartTime').value;
+        var endTime = document.getElementById('multipleEndTime').value;
+        startTime = `${multipleStopDate} ${startTime}`;
+        endTime = `${multipleStopDate} ${endTime}`;
+
+        const response = await fetch(`${API_BASE_URL}/api/logs/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization' : `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            clientName, startTime, endTime
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showLogs()
+        } else {
+          errorDiv.textContent = data.message || 'Inloggen mislukt';
+          authToken = null;
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Er is een fout opgetreden bij het inloggen';
+      }
+
     }
 
     async function showLogs() {
@@ -563,7 +596,8 @@
       document.querySelectorAll('.screen').forEach(el => el.style.display = 'none');
       document.getElementById(screen).style.display = 'block';
     }
-  </script>
+
+   </script>
 
 </body>
 

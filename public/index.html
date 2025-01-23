@@ -257,10 +257,7 @@
     };
     var errorDiv = document.getElementById('loginError')
 
-    const API_BASE_URL = window.location.hostname === 'localhost' ?
-      'http://localhost:3000' :
-      'https://share-f3ad.vercel.app';
-
+    const API_BASE_URL = '';
     async function login() {
       try {
         var username = document.getElementById('username').value

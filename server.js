@@ -17,7 +17,8 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Allows parsing JSON request bodies
 
 // Serve static files from the "public" directory
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Route to serve the index.html when visiting the root URL
 app.get('/', (req, res) => {

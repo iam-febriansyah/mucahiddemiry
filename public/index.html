@@ -172,11 +172,12 @@
     <img src="/assets/logo.png" alt="D.R Thuiszorg Logo" class="logo">
   </div>
 
+  <div id="loginError" class="error"></div>
+
   <!-- Login Screen -->
   <div id="loginScreen" class="screen" style="display:block;">
     <div class="form-container">
       <h2>Login</h2>
-      <div id="loginError" class="error"></div>
       <input id="username" placeholder="Gebruikersnaam" />
       <input type="password" id="password" placeholder="Wachtwoord" />
       <button onclick="login()">Inloggen</button>
@@ -186,7 +187,7 @@
   <!-- Main Screen -->
   <div id="mainScreen" class="screen">
     <div class="form-container">
-      <h3 id="welcomeMessage"></h3>
+      <h3 id="welcomeMessage">Welcome</h3>
       <button onclick="navigateTo('singleStop')">1 Stop Toevoegen</button>
       <button onclick="navigateTo('multipleStops')">Meerdere Stops Toevoegen</button>
       <button onclick="showLogs()">Bekijk Overzicht Uren</button>
@@ -210,14 +211,18 @@
   <div id="multipleStops" class="screen">
     <div class="form-container">
       <h3>Meerdere Stops Toevoegen</h3>
-      <div id="multipleStopsInputs">
-        <input id="multipleClientName" placeholder="Client Naam" />
-        <input type="date" id="multipleStopDate" />
-        <input type="time" id="multipleStartTime" placeholder="Start Tijd" />
-        <input type="time" id="multipleEndTime" placeholder="Eind Tijd" />
-        <button onclick="addMultipleStops()">Voeg Meerdere Stops Toe</button>
-        <button onclick="navigateTo('mainScreen')">Terug</button>
+      <div>
+        <input name="multipleClientName[]" placeholder="Client Naam" />
+        <input type="date" name="multipleStopDate[]" placeholder="Date" />
+        <input type="time" name="multipleStartTime[]" placeholder="Start Tijd" />
+        <input type="time" name="multipleEndTime[]" placeholder="Eind Tijd" />
       </div>
+
+      <div id="multipleStopsInputs"></div>
+
+      <button onclick="add()">Add row</button>
+      <button onclick="addMultipleStops()">Voeg Meerdere Stops Toe</button>
+      <button onclick="navigateTo('mainScreen')">Terug</button>
     </div>
   </div>
 
@@ -256,6 +261,7 @@
       direction: 'asc'
     };
     var errorDiv = document.getElementById('loginError')
+    var multipleStopsInputs = document.getElementById('multipleStopsInputs')
 
     const API_BASE_URL = '';
     async function login() {
@@ -322,14 +328,18 @@
       }
     }
 
-    async function addMultipleStops() {
+    async function addSingleStop() {
       try {
-        var clientName = document.getElementById('multipleClientName').value;
-        var multipleStopDate = document.getElementById('multipleStopDate').value;
-        var startTime = document.getElementById('multipleStartTime').value;
-        var endTime = document.getElementById('multipleEndTime').value;
-        startTime = `${multipleStopDate} ${startTime}`;
-        endTime = `${multipleStopDate} ${endTime}`;
+        var clientName = document.getElementById('clientName').value;
+        var stopDate = document.getElementById('stopDate').value;
+        var startTime = document.getElementById('startTime').value;
+        var endTime = document.getElementById('endTime').value;
+        startTime = `${stopDate} ${startTime}`;
+        endTime = `${stopDate} ${endTime}`;
+
+        if(clientName == '' || stopDate == '' || startTime == '' || endTime == ''){
+          errorDiv.textContent = 'All fields are required';return;
+        }
 
         const response = await fetch(`${API_BASE_URL}/api/logs/add`, {
           method: 'POST',
@@ -348,12 +358,102 @@
           showLogs()
         } else {
           errorDiv.textContent = data.message || 'Inloggen mislukt';
-          authToken = null;
         }
       } catch (error) {
         errorDiv.textContent = 'Er is een fout opgetreden bij het inloggen';
       }
+    }
 
+    async function add(){
+      errorDiv.textContent = '';
+      const newDiv = document.createElement("div");
+
+      const clientInput = document.createElement("input");
+      clientInput.setAttribute("name", "multipleClientName[]");
+      clientInput.setAttribute("placeholder", "Client Naam");
+
+      const dateInput = document.createElement("input");
+      dateInput.setAttribute("type", "date");
+      dateInput.setAttribute("name", "multipleStopDate[]");
+      dateInput.setAttribute("placeholder", "Date");
+
+      const startTimeInput = document.createElement("input");
+      startTimeInput.setAttribute("type", "time");
+      startTimeInput.setAttribute("name", "multipleStartTime[]");
+      startTimeInput.setAttribute("placeholder", "Start Tijd");
+
+      const endTimeInput = document.createElement("input");
+      endTimeInput.setAttribute("type", "time");
+      endTimeInput.setAttribute("name", "multipleEndTime[]");
+      endTimeInput.setAttribute("placeholder", "Eind Tijd");
+
+      newDiv.appendChild(clientInput);
+      newDiv.appendChild(dateInput);
+      newDiv.appendChild(startTimeInput);
+      newDiv.appendChild(endTimeInput);
+      multipleStopsInputs.appendChild(newDiv);
+    }
+
+    async function addMultipleStops(){
+      try {
+        errorDiv.textContent = '';
+
+        var multipleClientNames = Array.from(document.querySelectorAll('input[name="multipleClientName[]"]'))
+                                  .map(function(input) {
+                                    return input.value;
+                                  });
+        var multipleStopDates = Array.from(document.querySelectorAll('input[name="multipleStopDate[]"]'))
+                                  .map(function(input) {
+                                    return input.value;
+                                  });
+        var multipleStartTimes = Array.from(document.querySelectorAll('input[name="multipleStartTime[]"]'))
+                                  .map(function(input) {
+                                    return input.value;
+                                  });
+        var multipleEndTimes = Array.from(document.querySelectorAll('input[name="multipleEndTime[]"]'))
+                                  .map(function(input) {
+                                    return input.value;
+                                  });
+        var clientNames = [];
+        var startTimes = [];
+        var endTimes = [];
+
+        for (let i = 0; i < multipleClientNames.length; i++) {
+          const clientName = multipleClientNames[i];
+          const StopDate = multipleStopDates[i];
+          const StartTime = multipleStartTimes[i];
+          const endTime = multipleEndTimes[i];
+          if(clientName == '' || StopDate == '' || StartTime == '' || endTime == ''){
+            errorDiv.textContent = 'All fields are required';return;
+          }
+          clientNames.push(clientName)
+          startTimes.push(`${StopDate} ${StartTime}`)
+          endTimes.push(`${StopDate} ${endTime}`)
+        }
+
+
+        const response = await fetch(`${API_BASE_URL}/api/logs/add-multiple`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization' : `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            clientNames, startTimes, endTimes
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showLogs()
+        } else {
+          errorDiv.textContent = data.message || 'Inloggen mislukt';
+        }
+      } catch (error) {
+        console.log(error)
+        errorDiv.textContent = 'Er is een fout opgetreden bij het inloggen';
+      }
     }
 
     async function showLogs() {

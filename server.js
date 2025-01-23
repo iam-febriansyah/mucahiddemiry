@@ -25,13 +25,13 @@ app.get('/', (req, res) => {
 });
 
 // Use the auth routes for login and registration
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // Log routes for adding and viewing logs
-app.use('/api/logs', logRoutes); // Register the log routes
+app.use('/logs', logRoutes); // Register the log routes
 
 // Sample protected route for user logs (this can be extended for admin view)
-app.get('/api/user/logs', protect, (req, res) => {
+app.get('/user/logs', protect, (req, res) => {
     if (req.user && req.user.isAdmin) {
         // Admin can view all users' logs here (future functionality)
         res.send('Admin view logs here');
